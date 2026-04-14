@@ -14,7 +14,6 @@ import { GlobalRateLimiter } from './utils/limiter/rate.limiter.js';
 const bootstrap = async () => {
   const app = express();
   const { PORT } = env;
-  console.log(env);
 
   await connectDb();
   await redis_connection();

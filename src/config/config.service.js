@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
 config({ path: resolve('./src/config/.env') });
-export const PORT = process.env.PORT || 5000;
+export const PORT = process.env.PORT ;
 export const NODE_ENV = process.env.NODE_ENV;
 export const MONGOOSE_URI = process.env.MONGOOSE_URI;
 export const DB_NAME = process.env.DB_NAME;

@@ -26,7 +26,7 @@ const bootstrap = async () => {
         cb(new ApiError('not allowed by cors', 403), false);
       }
     },
-  };
+   };
 
   app.use(
     cors({

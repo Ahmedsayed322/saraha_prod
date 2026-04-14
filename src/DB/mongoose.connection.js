@@ -6,11 +6,11 @@ const connectDb = () => {
     serverSelectionTimeoutMS: 5000,
   })
     .then(() => {
-      console.error(`success to connect ${DB_NAME} app`);
+      console.error(`success to connect saraha app`);
     })
     .catch((e) => {
       console.error(
-        `failed to connect ${DB_NAME} app`,
+        `failed to connect saraha app`,
         NODE_ENV === 'development' ? e : '',
       );
     });

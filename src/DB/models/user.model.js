@@ -1,0 +1,143 @@
+import { model, Schema } from 'mongoose';
+import {
+  provider,
+  hashSecurity,
+  asymmetric,
+  authEnum,
+} from '../../utils/index.js';
+import jwt from 'jsonwebtoken';
+import { env } from '../../config/index.js';
+
+const userSchema = new Schema(
+  {
+    firstName: {
+      type: String,
+      required: true,
+      minLength: 3,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      minLength: 3,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      match: [
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        'invalid email format',
+      ],
+    },
+
+    password: {
+      type: String,
+      required: function () {
+        return this.provider == provider.sys;
+      },
+      minLength: [8, 'password length should be more than 8'],
+      validate: {
+        validator: function (val) {
+          const checkPasswordFormat = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+          return checkPasswordFormat.test(val);
+        },
+        message:
+          'password must include uppercase, lowercase letters and a number',
+      },
+    },
+    phone: {
+      type: String,
+      match: [
+        /^\+?[1-9]\d{7,14}$/,
+        // /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
+        'invalid phone number',
+      ],
+    },
+    provider: {
+      type: String,
+      enum: Object.values(provider),
+      default: provider.sys,
+    },
+    role: {
+      type: String,
+      enum: Object.values(authEnum),
+      default: authEnum.user,
+    },
+    // profilePic: {
+    //   type: String,
+    // },
+    profilePic: {
+      public_id: { type: String },
+      secure_url: { type: String },
+    },
+    changeCredentials: {
+      type: Date,
+    },
+    gallery: [
+      {
+        public_id: { type: String },
+        secure_url: { type: String },
+      },
+    ],
+    coverPics: [
+      {
+        public_id: { type: String },
+        secure_url: { type: String },
+      },
+    ],
+    visitCount: {
+      type: Number,
+      default: 0,
+    },
+    FA: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    strictQuery: true,
+  },
+);
+
+userSchema
+  .virtual('fullName')
+  .get(function () {
+    return (this.fullName = this.firstName + ' ' + this.lastName);
+  })
+  .set(function (val) {
+    const parts = val.split(' ');
+    this.firstName = parts[0];
+    this.lastName = parts.slice(1).join(' ');
+  });
+
+userSchema.pre('save', async function () {
+  if (this.isModified('phone')) {
+    this.phone = await asymmetric.Encryption(this.phone);
+  }
+});
+userSchema.methods.generateToken = function (type, tokenId ) {
+  const { JWT_SECRET, REFRESH_TOKEN_SECRET, RESET_TOKEN_SECRET } = env;
+  if (type === 'reset') {
+    const token = jwt.sign({ id: this._id }, RESET_TOKEN_SECRET, {
+      expiresIn: '15m',
+      jwtid:tokenId
+    });
+    return token;
+  }
+  const token = jwt.sign(
+    { id: this._id },
+    type === 'access' ? JWT_SECRET : REFRESH_TOKEN_SECRET,
+    {
+      expiresIn: type === 'access' ? '30m' : '7d',
+      jwtid: tokenId,
+    },
+  );
+  return token;
+};
+const USER = model('user', userSchema);
+export default USER;

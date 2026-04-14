@@ -1,0 +1,24 @@
+export const createDoc = async (model, { data = {}, options }) => {
+  return await model.create(data, options);
+};
+export const findAll = async (model, { filter = {} }) => {
+  return await model.find(filter);
+};
+export const findOneDoc = async (model, { filter = {}, options }) => {
+  return await model.findOne(filter, options);
+};
+export const deleteOneDoc = async (model, { filter = {}, options }) => {
+  return await model.deleteOne(filter, options);
+};
+export const findDocById = async (model, { id, select = {} }) => {
+  return await model.findById(id).select(select);
+};
+export const updateOneDoc = async (
+  model,
+  { filter = {}, update = {}, options },
+) => {
+  return await model.updateOne(filter, update, options);
+};
+export const deleteManyDocs = async (model, { filter = {}, options }) => {
+  return await model.deleteMany(filter, options);
+};

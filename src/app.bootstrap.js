@@ -15,7 +15,7 @@ const bootstrap = async () => {
   const app = express();
   const { PORT } = env;
   console.log(env);
-  
+
   await connectDb();
   await redis_connection();
   await asymmetric.runForFirstTime();
@@ -37,7 +37,9 @@ const bootstrap = async () => {
     GlobalRateLimiter,
     express.json(),
   );
-
+  app.use('/', (req, res) => {
+    res.json({ message: 'welcome to saraha Api' });
+  });
   app.use('/users', userRouter);
   app.use('/messages', messageRouter);
   app.use(KnownErrorHandler, GlobalErrorHandler);

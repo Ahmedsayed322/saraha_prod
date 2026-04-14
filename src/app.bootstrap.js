@@ -20,7 +20,8 @@ const bootstrap = async () => {
   await asymmetric.runForFirstTime();
   const corsOption = {
     origin: (origin, cb) => {
-      if (env.WHITE_LIST.includes(origin)) {
+      // اضف !origin عشان تسمح بـ Postman والـ server-to-server requests
+      if (!origin || env.WHITE_LIST.includes(origin)) {
         cb(null, true);
       } else {
         cb(new ApiError('not allowed by cors', 403), false);

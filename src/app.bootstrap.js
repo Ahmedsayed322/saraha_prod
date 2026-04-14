@@ -26,7 +26,7 @@ const bootstrap = async () => {
         cb(new ApiError('not allowed by cors', 403), false);
       }
     },
-   };
+  };
 
   app.use(
     cors({
@@ -36,16 +36,17 @@ const bootstrap = async () => {
     GlobalRateLimiter,
     express.json(),
   );
-  app.use('/', (req, res) => {
+  app.get('/', (req, res) => {
     res.json({ message: 'welcome to saraha Api' });
   });
   app.use('/users', userRouter);
   app.use('/messages', messageRouter);
-  app.use(KnownErrorHandler, GlobalErrorHandler);
+
   app.use('/uploads', express.static(resolve('uploads')));
   app.use('{/dummy}', (req, res, next) => {
     res.status(404).json({ message: `this ${req.originalUrl} is not exist` });
   });
+  app.use(KnownErrorHandler, GlobalErrorHandler);
   app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
 };
 export default bootstrap;
